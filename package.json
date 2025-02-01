@@ -19,6 +19,7 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.32.1",
     "@tsconfig/node22": "^22.0.0",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^22.10.7",
@@ -28,9 +29,11 @@
     "@vue/tsconfig": "^0.7.0",
     "cypress": "^14.0.0",
     "jsdom": "^26.0.0",
+    "naive-ui": "^2.41.0",
     "npm-run-all2": "^7.0.2",
     "start-server-and-test": "^2.0.10",
     "typescript": "~5.7.3",
+    "vfonts": "^0.0.3",
     "vite": "^6.0.11",
     "vite-plugin-vue-devtools": "^7.7.0",
     "vitest": "^3.0.2",
