@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-
+import {NMessageProvider} from 'naive-ui'
+import { NNotificationProvider } from 'naive-ui';
 </script>
 
 <template>
   <div>
-    <RouterView />
+    <n-message-provider>
+      <n-notification-provider>
+    <RouterView /></n-notification-provider>
+  </n-message-provider>
   </div>
  
 </template>

@@ -5,19 +5,10 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-import {
-    // create naive ui
-    create,
-    // component
-    NButton,
-    NModal
-  } from 'naive-ui'
+import naive from 'naive-ui'
 
   
-  const naive = create({
-    components: [NButton,NModal]
-  })
-  
+
 
 
 const app = createApp(App)

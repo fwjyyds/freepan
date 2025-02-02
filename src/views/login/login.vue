@@ -1,9 +1,45 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-var showModal1=ref(true)
+import { useMessage } from 'naive-ui'
+import { useNotification } from 'naive-ui'
+const message=useMessage()
+const notification=useNotification()
+var showModal1=ref(false),codeurl=ref<string>('/api/user/create'),vinput=ref(''),username=ref(''),password=ref('')
+const resetcodeurl=()=>codeurl.value=codeurl.value+'?'+Math.random()
 const login=()=>{
-    alert(124)
+fetch('/api/user/login',{
+    method:'POST',
+    headers: {
+        'Content-Type': 'application/json' // 设置请求头，告知服务器请求体是JSON格式
+    },
+    body:JSON.stringify({
+        username:username.value,
+        password:password.value,
+        code:vinput.value
+})
+}).then(res=>res.json()).then(res=>{
+if(res.status===200){
+    showModal1.value=false
+    notification['success']({
+          content: '完成'+res.status,
+          meta: res.message,
+          duration: 2000,
+          keepAliveOnHover: true
+        })
+}else{
+    notification['error']({
+          content: '错误'+res.status,
+          meta: res.message,
+          duration: 2000,
+          keepAliveOnHover: true
+        })
+   
+   
 }
+})
+}
+
+
 </script>
 
 <template>
@@ -18,9 +54,9 @@ const login=()=>{
   :style="{width:'400px'}"
   >
   <!--   :style="{ width: '800px',color:'#000000' }"  -->
-<div>
-    <input type="text">
-    <img src="" alt="">
+<div class="vertify">
+    <input type="text" v-model="vinput" placeholder="请输入验证码">
+    <img :src="codeurl" @click="resetcodeurl" alt="">
 </div>
 <div class="btn2">
     <n-button type="tertiary"  @click="showModal1 = !showModal1">
@@ -42,13 +78,13 @@ const login=()=>{
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 1024"><path d="M858.5 763.6a374 374 0 0 0-80.6-119.5a375.63 375.63 0 0 0-119.5-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1c-.4.2-.8.3-1.2.5c-44.8 18.9-85 46-119.5 80.6a375.63 375.63 0 0 0-80.6 119.5A371.7 371.7 0 0 0 136 901.8a8 8 0 0 0 8 8.2h60c4.4 0 7.9-3.5 8-7.8c2-77.2 33-149.5 87.8-204.3c56.7-56.7 132-87.9 212.2-87.9s155.5 31.2 212.2 87.9C779 752.7 810 825 812 902.2c.1 4.4 3.6 7.8 8 7.8h60a8 8 0 0 0 8-8.2c-1-47.8-10.9-94.3-29.5-138.2zM512 534c-45.9 0-89.1-17.9-121.6-50.4S340 407.9 340 362c0-45.9 17.9-89.1 50.4-121.6S466.1 190 512 190s89.1 17.9 121.6 50.4S684 316.1 684 362c0 45.9-17.9 89.1-50.4 121.6S557.9 534 512 534z" fill="#fff"></path></svg>
              用户名
                </div>
-            <div><input placeholder="username" type="text"></div>
+            <div><input v-model="username" placeholder="username" type="text"></div>
         </div>
         <div class="password">
             <div>
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><g fill="transparent" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><circle cx="12" cy="16" r="1"></circle><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></g></svg>
                 密码</div>
-            <div><input placeholder="password" type="password"></div>
+            <div><input v-model="password" placeholder="password" type="password"></div>
         </div>
         <div class="opt">
             <a href="#">忘记密码</a>
@@ -82,6 +118,21 @@ const login=()=>{
 <style scoped>
 div,a,.btn button{
     color:#fff
+}
+.vertify{
+    display: flex;
+    flex-direction: row;
+    margin-bottom:10px;
+    justify-content: center;
+}
+.vertify input{
+    height:36px;
+    border:1px lightgrey solid;
+}
+.vertify img{
+    height:40px;
+    width:100px;
+    cursor: pointer;
 }
 .loginmodal{
     div{
@@ -150,6 +201,7 @@ svg{
     width:350px;
     height:30px;
     font-size: 16px;
+color:#fff;
 }
 ul{
     list-style: none;
