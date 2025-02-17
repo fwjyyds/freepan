@@ -3,6 +3,9 @@
     width:calc(100vw )
 
 }
+*{
+    font-family: 'microsoft yahei';
+}
 html,body{
     height:100%;
     width:100%;
