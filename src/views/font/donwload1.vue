@@ -76,7 +76,7 @@ function handleCheck(rowKeys: DataTableRowKey[]) {
 
 </script>
 <template>
-  <n-space vertical>
+  <n-space vertical class="demo">
     <n-tabs key="barleft" addable type="bar" animated placement="left" class="tabs"> 
     <n-tab-pane name="上传中(0)"
         tab="上传中(0)">
@@ -93,10 +93,16 @@ function handleCheck(rowKeys: DataTableRowKey[]) {
 
 </template>
 <style scoped>
+.demo{
+
+  height:calc(100vh - 221.4px)
+}
 /* .tabs{
     height:2px !important
 } */
+:deeo(div .n-card__content){
 
+}
 :deep(div .n-tabs) {
   height: calc(100vh - 194.4px) !important;
   overflow: hidden !important;

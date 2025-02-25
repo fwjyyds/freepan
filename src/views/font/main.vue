@@ -21,45 +21,45 @@ import { defineComponent, h, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 
-const message =useMessage()
+const message = useMessage()
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
 }
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
-const logout=()=>{
-//删除本地cookie
-//路由跳转
-router.push('/login')
+const logout = () => {
+  //删除本地cookie
+  //路由跳转
+  router.push('/login')
 
 
 }
 const handleSelect = (key: string) => {
-  if(key === 'logout'){
-logout()
+  if (key === 'logout') {
+    logout()
   }
-  else{
+  else {
     message.info(`You clicked ${key}`)
   }
 }
-const options= [
-        {
-          label: '用户资料',
-          key: 'profile',
-          icon: renderIcon(UserIcon)
-        },
-        {
-          label: '编辑用户资料',
-          key: 'editProfile',
-          icon: renderIcon(EditIcon)
-        },
-        {
-          label: '退出登录',
-          key: 'logout',
-          icon: renderIcon(LogoutIcon)
-        }
-      ]
+const options = [
+  {
+    label: '用户资料',
+    key: 'profile',
+    icon: renderIcon(UserIcon)
+  },
+  {
+    label: '编辑用户资料',
+    key: 'editProfile',
+    icon: renderIcon(EditIcon)
+  },
+  {
+    label: '退出登录',
+    key: 'logout',
+    icon: renderIcon(LogoutIcon)
+  }
+]
 const collapsed = ref(false)
 const menuOptions: MenuOption[] = [
   {
@@ -186,6 +186,35 @@ const menuOptions: MenuOption[] = [
     icon: renderIcon(SI)
   },
 ]
+
+
+
+
+import type { CSSProperties } from 'vue'
+const railStyle = ({
+  focused,
+  checked
+}: {
+  focused: boolean
+  checked: boolean
+}) => {
+  const style: CSSProperties = {}
+  if (checked) {
+    style.background = 'lightgray'
+
+    if (focused) {
+      style.boxShadow = '0 0 0 2px #d0305040'
+    }
+  }
+  else {
+    style.background = '#000000'
+    if (focused) {
+      style.boxShadow = '0 0 0 2px #2080f040'
+    }
+  }
+  return style
+}
+
 </script>
 <template>
 
@@ -202,18 +231,32 @@ const menuOptions: MenuOption[] = [
       <div class="right">
         <div class="top">
           <div class="opt">
-            <n-input placeholder="搜索" class="search">
-              <template #prefix>
-                <n-icon :component="FlashOutline" />
-              </template>
-            </n-input>
+            <div class="search-box">
+              <n-input placeholder="搜索" class="search">
+                <template #prefix>
+                  <n-icon :component="FlashOutline" />
+                </template>
+              </n-input>
+            </div>
+
+            <div class="switch">
+              <n-switch class="switch1" :rail-style="railStyle">
+                <template #checked>
+                  白天
+                </template>
+                <template #unchecked>
+                  午夜
+                </template>
+              </n-switch>
+            </div>
+
           </div>
           <n-dropdown :options="options" @select="handleSelect">
-          <div class="pointer user_info">
-            <img src="../../assets/img/a1.jpeg" class="face" alt="">
-            <div class="name">asdasdasdasdasdsdasdasdasdsa</div>
-          </div>
-        </n-dropdown>
+            <div class="pointer user_info">
+              <img src="../../assets/img/a1.jpeg" class="face" alt="">
+              <div class="name">asdasdasdasdasdsdasdasdasdsa</div>
+            </div>
+          </n-dropdown>
         </div>
         <div class="bottom">
           <RouterView></RouterView>
@@ -227,36 +270,61 @@ const menuOptions: MenuOption[] = [
   </div>
 </template>
 <style scoped>
-.user_info{
+.opt {
+
+  display: flex;
+  flex-direction: row;
+  width: 400px;
+  align-items: center;
+  .search-box{
+    width:240px;
+  }
+  :deep(.n-input-wrapper) {
+
+  }
+
+  .switch {
+    margin-left: 10px;
+  }
+}
+
+.switch1 {}
+
+.user_info {
   display: flex;
   flex-direction: row;
 
 }
-.pointer{
+
+.pointer {
   cursor: pointer;
 }
-.name{
+
+.name {
   margin-left: 4px;
-  margin-right:6px;
+  margin-right: 6px;
   font-size: 1em;
   max-width: 5em;
   overflow: hidden;
-  text-overflow: ellipsis;  
+  text-overflow: ellipsis;
 
   text-align: left;
   display: flex;
   align-items: flex-end;
 }
-.face{
-  width:36px;
-  height:36px;
-  border-radius:50%;
+
+.face {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
 }
-.search{
+
+.search {
   background-color: #F1F3F8;
-  border-radius:29px;
-  
+  border-radius: 29px;
+
 }
+
 .container {
   display: flex;
   flex-direction: row;
@@ -268,7 +336,7 @@ const menuOptions: MenuOption[] = [
 }
 
 .right {
-  
+
   flex: 6;
 
 }
@@ -276,15 +344,17 @@ const menuOptions: MenuOption[] = [
 .top {
   display: flex;
   flex-direction: row;
-  padding:6px;
-  height:50px;
+  padding: 6px 12px;
+  height: 50px;
   justify-content: space-between;
+
   ul {
     display: flex;
     flex-direction: row;
     list-style: none;
   }
-box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   align-items: center;
 }
 </style>
