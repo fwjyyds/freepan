@@ -1,19 +1,24 @@
 {
-  "name": "wp",
-  "version": "0.0.0",
+  "name": "xx网盘",
+  "version": "0.2.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
+  "main": "electron/main.js",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently vite \"electron .\"",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:e2e": "start-server-and-test preview http://localhost:4173 'cypress run --e2e'",
     "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' http://localhost:4173 'cypress open --e2e'",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build"
+    "type-check": "vue-tsc --build",
+    "start": "electron ."
   },
   "dependencies": {
+    "@vicons/ionicons5": "^0.13.0",
+    "concurrently": "^9.1.2",
+    "electron-updater": "^6.3.9",
     "pinia": "^2.3.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
@@ -28,8 +33,10 @@
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.7.0",
     "cypress": "^14.0.0",
+    "electron": "^34.2.0",
     "jsdom": "^26.0.0",
     "naive-ui": "^2.41.0",
+    "nodemon": "^3.1.9",
     "npm-run-all2": "^7.0.2",
     "start-server-and-test": "^2.0.10",
     "typescript": "~5.7.3",

@@ -3,10 +3,10 @@ import { ref } from "vue";
 import Download1 from "./donwload1.vue";
 import Download2 from "./donwload2.vue";
 
-var showModal1 = ref(true),f1=ref(null),f2=ref(null);
+var showModal1 = ref(false),f1=ref(null),f2=ref(null);
 const sendfile = () => {
-f1.value?.submit();
-f2.value?.submit();
+// f1.value?.submit();
+// f2.value?.submit();
 };
 const dlfile = async () => {  
 await fetch("/api/upload/dlfile?filename=123.txt", {
