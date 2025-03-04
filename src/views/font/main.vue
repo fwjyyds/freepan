@@ -228,7 +228,7 @@ const railStyle = ({
 
 
     <n-layout>
-      <div class="right">
+      <div class="right " style="height:calc(100% - 63px )">
         <div class="top">
           <div class="opt">
             <div class="search-box">
@@ -258,7 +258,7 @@ const railStyle = ({
             </div>
           </n-dropdown>
         </div>
-        <div class="bottom">
+        <div class="bottom h100" >
           <RouterView></RouterView>
         </div>
       </div>
@@ -270,6 +270,9 @@ const railStyle = ({
   </div>
 </template>
 <style scoped>
+.h100{
+  height: 100%;
+}
 .opt {
 
   display: flex;
