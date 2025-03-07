@@ -2,10 +2,20 @@
 import { ref } from 'vue';
 import { useMessage } from 'naive-ui'
 import { useNotification } from 'naive-ui'
+import { useRouter } from 'vue-router'
+
+const router=useRouter()
 const message=useMessage()
 const notification=useNotification()
 var showModal1=ref(false),codeurl=ref<string>('/api/user/create'),vinput=ref(''),username=ref(''),password=ref('')
 const resetcodeurl=()=>codeurl.value=codeurl.value+'?'+Math.random()
+
+import jwtDecode from 'jwt-decode';
+import { Buffer } from 'buffer';
+import cookieSignature from 'cookie-signature';
+
+
+
 const login=()=>{
 fetch('/api/user/login',{
     method:'POST',
@@ -18,18 +28,23 @@ fetch('/api/user/login',{
         code:vinput.value
 })
 }).then(res=>res.json()).then(res=>{
-if(res.status===200){
+    console.log(res,';====',res.data)
+
+    
+if(res.data.status===200){
     showModal1.value=false
     notification['success']({
-          content: '完成'+res.status,
-          meta: res.message,
+          content: '完成'+res.data.status,
+          meta: res.data.message,
           duration: 2000,
           keepAliveOnHover: true
         })
+        //个人信息cookie存储
+        router.push('/main')
 }else{
     notification['error']({
-          content: '错误'+res.status,
-          meta: res.message,
+          content: '错误'+res.data.status,
+          meta: res.data.message,
           duration: 2000,
           keepAliveOnHover: true
         })
@@ -56,7 +71,7 @@ if(res.status===200){
   <!--   :style="{ width: '800px',color:'#000000' }"  -->
 <div class="vertify">
     <input type="text" v-model="vinput" placeholder="请输入验证码">
-    <img :src="codeurl" @click="resetcodeurl" alt="">
+    <img v-if="showModal1" :src="codeurl" @click="resetcodeurl" alt="">
 </div>
 <div class="btn2">
     <n-button type="tertiary"  @click="showModal1 = !showModal1">
