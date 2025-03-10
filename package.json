@@ -19,6 +19,7 @@
     "@vicons/ionicons5": "^0.13.0",
     "concurrently": "^9.1.2",
     "cookie-signature": "^1.2.2",
+    "crypto-js": "^4.2.0",
     "echarts": "^5.6.0",
     "electron-updater": "^6.3.9",
     "jwt-decode": "^4.0.0",
