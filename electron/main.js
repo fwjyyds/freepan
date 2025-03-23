@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain  }= require ('electron')
 const path = require('path');
 const { fileURLToPath } = require('url');
 const { dirname } = require('path');
-
+const { checkUpdate } = require('./update');
 const createWindow = () => {
     const win = new BrowserWindow({
       width: 800,

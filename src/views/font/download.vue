@@ -2,10 +2,53 @@
 import { ref } from "vue";
 import Download1 from "./donwload1.vue";
 import Download2 from "./donwload2.vue";
-
+import type { Ref } from 'vue';
+import type { UploadFileInfo, UploadInst } from 'naive-ui'
 var showModal1 = ref(false),f1=ref(null),f2=ref(null);
-const sendfile = () => {
-// f1.value?.submit();
+var filelist1:Ref<UploadFileInfo[]> = ref([]),filelist2:Ref<UploadFileInfo[]> = ref([]);
+//获取第一个
+const handleChange1=(options: { fileList: UploadFileInfo[] })=>{
+  filelist1.value = options.fileList
+}
+//获取第二个
+const handleChange2=(options: { fileList: UploadFileInfo[] })=>{
+  filelist2.value = options.fileList
+}
+
+const sendsinglefile = async (bigfile: Object,size:number) => {  
+let start = 0;
+let file=bigfile.file
+let end=Math.min(size,file.size)
+let index =0;
+let chunkarray=[]
+
+console.log(file.size,start,end,'612312')
+while (start < file.size) {
+        const chunk = file.slice(start, end); // 切片文件
+        chunkarray.push(chunk); // 切片文件
+       console.log(chunk,'6')
+        start = end;
+        end = Math.min(start + size, file.size);
+        index++;
+    }
+    const formData = new FormData();
+    console.log(chunkarray,'66666666666666666666666666')
+    formData.append("files", '234234'); // 上传第一个切片
+    await fetch('/api/upload/ulfile',{
+      method: "POST",
+  
+      body:  formData
+    }).then(res=>{
+      console.log(res,'====')
+    })
+}
+const sendfile =async () => {
+  console.log(filelist1.value, filelist2.value,'================')
+  const chunkSize = 10 * 1024; // 每个切片的大小，这里设置为10kb
+  for(let i=0;i<filelist1.value.length;i++){
+ await sendsinglefile(filelist1.value[i],chunkSize)
+  }
+  // f1.value?.submit();
 // f2.value?.submit();
 };
 const dlfile = async () => {  
@@ -31,24 +74,17 @@ await fetch("/api/upload/dlfile?filename=123.txt", {
     <div class="vertify">
       <div class="des">点击上传文件</div>
       <div>
-        <n-upload ref="f1"
-        name="file"
-           action="/api/upload/ulfile"
-        :default-upload="false"   :max="5"
-         :headers="{
-            'naive-info': 'hello!',
-          }"
-          :data="{        
-            'naive-data': 'cool! naive!',
-          }"
+        <n-upload 
+   @change="handleChange1"
+   :max="5"
         >
-          <n-button>上传文件</n-button>
-        </n-upload>
+    <n-button>上传文件</n-button>
+  </n-upload>
       </div>
       <div class="des">或者,你可以把文件拖拽到此处拖拽上传文件夹。</div>
       <div>
         <n-upload ref="f2"
-        action="/api/upload/ulfile"
+          @change="handleChange2"
         
           multiple
           directory-dnd
@@ -62,7 +98,7 @@ await fetch("/api/upload/dlfile?filename=123.txt", {
               点击或者拖动文件到该区域来上传
             </n-text>
             <n-p depth="3" style="margin: 8px 0 0 0">
-              请不要上传敏感数据，比如你的银行卡号和密码，信用卡号有效期和安全码
+              请不要上传敏感数据，比如你的银行卡号和密码，信用卡号有效期和安全码(最多5个)
             </n-p>
           </n-upload-dragger>
         </n-upload>

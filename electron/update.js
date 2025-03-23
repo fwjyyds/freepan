@@ -1,7 +1,3 @@
-import pkg from 'electron-updater';
-const { autoUpdater } = pkg;
-var mainWin = null;
-
 const checkUpdate = (win, ipcMain) => {
   autoUpdater.autoDownload = true; // 自动下载
   autoUpdater.autoInstallOnAppQuit = true; // 应用退出后自动安装
@@ -12,4 +8,4 @@ const checkUpdate = (win, ipcMain) => {
   ipcMain.handle('install', () => autoUpdater.quitAndInstall());
 };
 
-export default checkUpdate; 
+module.exports = checkUpdate;
