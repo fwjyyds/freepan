@@ -21,6 +21,60 @@ import { defineComponent, h, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 
+var decryptword:any=ref({})
+//个人信息
+let key:any=localStorage.getItem('userinfo')||"[]"
+console.log(key, 'key')
+let datetmp=new Date().getTime()-parseInt(key.split('|')[0])
+console.log(new Date().getTime(),parseInt(key.split('|')[0]),datetmp, 'datetmp')
+if(datetmp>1000*3600*24){
+  localStorage.removeItem('userinfo')
+  localStorage.removeItem(key)
+}
+else{
+
+  let userinfo:any=localStorage.getItem(key)||"[]"
+async function jwkToCryptoKey(jwk:any) {
+    return await crypto.subtle.importKey(
+        "jwk", // 导入格式
+        jwk,   // JWK对象
+        {
+            name: "AES-GCM",
+            length: 256, // 密钥长度
+        },
+        true,  // 是否可以导出密钥
+        ["encrypt", "decrypt"] // 密钥用法
+    );
+}
+userinfo=JSON.parse(userinfo)
+// AES-GCM解密函数
+async function decrypt(key:any, encrypted:any) {
+    const decoder = new TextDecoder();
+    const ivBuffer = Uint8Array.from(atob(encrypted.iv), c => c.charCodeAt(0));
+    const encryptedBuffer = Uint8Array.from(atob(encrypted.data), c => c.charCodeAt(0));
+
+    const decryptedData = await crypto.subtle.decrypt(
+        {
+            name: "AES-GCM",
+            iv: ivBuffer
+        },
+        key,
+        encryptedBuffer
+    );
+
+    // 将解密后的ArrayBuffer转换回字符串
+    return decoder.decode(decryptedData);
+}
+ jwkToCryptoKey(userinfo.key).then(async res2 => {
+       
+             decryptword.value = await decrypt(res2, userinfo.encrypted)
+             decryptword.value=JSON.parse(decryptword.value)
+            console.log(decryptword.value, '解密后')
+        })
+
+}
+
+
 const message = useMessage()
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
@@ -254,7 +308,7 @@ const railStyle = ({
           <n-dropdown :options="options" @select="handleSelect">
             <div class="pointer user_info">
               <img src="../../assets/img/a1.jpeg" class="face" alt="">
-              <div class="name">asdasdasdasdasdsdasdasdasdsa</div>
+              <div class="name">{{decryptword["accout"]}}</div>
             </div>
           </n-dropdown>
         </div>

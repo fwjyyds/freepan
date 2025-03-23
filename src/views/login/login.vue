@@ -9,7 +9,7 @@ const message = useMessage()
 const notification = useNotification()
 var showModal1 = ref(false), codeurl = ref<string>('/api/user/create'), vinput = ref(''), username = ref(''), password = ref('')
 const resetcodeurl = () => codeurl.value = codeurl.value + '?' + Math.random()// AES-GCM加密函数
-async function encrypt(key, data, iv) {
+async function encrypt(key:any, data:any, iv:any) {
     const encoder = new TextEncoder();
     const encodedData = encoder.encode(data);
 
@@ -30,7 +30,7 @@ async function encrypt(key, data, iv) {
 }
 
 // AES-GCM解密函数
-async function decrypt(key, encrypted) {
+async function decrypt(key:any, encrypted:any) {
     const decoder = new TextDecoder();
     const ivBuffer = Uint8Array.from(atob(encrypted.iv), c => c.charCodeAt(0));
     const encryptedBuffer = Uint8Array.from(atob(encrypted.data), c => c.charCodeAt(0));
@@ -107,6 +107,10 @@ const login = () => {
                 keepAliveOnHover: true
             })
             //个人信息cookie存储
+            const key=new Date().getTime().toString()+'|userinfo'
+            localStorage.setItem(key, JSON.stringify(res.data.info))
+            const key2='userinfo'
+            localStorage.setItem(key2, key)
             await jwkToCryptoKey(res.data.info.key).then(async res2 => {
             console.log(res, res2, '====', res.data.info, '6666', '8888', res.data.info.encrypted)
             const decryptword = await decrypt(res2, res.data.info.encrypted)
