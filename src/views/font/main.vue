@@ -19,9 +19,10 @@ import {
 import { NIcon } from 'naive-ui'
 import { defineComponent, h, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-
-
 var decryptword:any=ref({})
+
+
+
 //个人信息
 let key:any=localStorage.getItem('userinfo')||"[]"
 console.log(key, 'key')

@@ -4,6 +4,8 @@ const path = require('path');
 const { fileURLToPath } = require('url');
 const { dirname } = require('path');
 const { checkUpdate } = require('./update');
+
+console.log(__dirname,'======================== ',path);
 const createWindow = () => {
     const win = new BrowserWindow({
       width: 800,
@@ -13,7 +15,7 @@ const createWindow = () => {
       webPreferences: {
         preload: path.join(__dirname, 'preload.js'),
         nodeIntegration: true, //开启true这一步很重要,目的是为了vue文件中可以引入node和electron相关的API
-      contextIsolation: true, // 可以使用require方法
+      contextIsolation: false, // 可以使用require方法
       enableRemoteModule: true, // 可以使用remote方法
       },
       icon: './logo.ico', // 设置窗口图标
@@ -38,3 +40,24 @@ const createWindow = () => {
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
   })
+
+// 处理下载文件的请求
+// ipcMain.handle('download-file', async (event, args) => {
+//   const { userid, path, outputPath } = args;
+
+//   const response = await fetch('/api/download/downloadFile', {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json"
+//     },
+//     body: JSON.stringify({ userid, path })
+//   });
+
+//   const writer = fs.createWriteStream(outputPath);
+//   response.body.pipe(writer);
+
+//   return new Promise((resolve, reject) => {
+//     writer.on('finish', resolve);
+//     writer.on('error', reject);
+//   });
+// });

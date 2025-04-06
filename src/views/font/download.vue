@@ -159,18 +159,7 @@ const dlfile = async () => {
         <Download2></Download2>
       </n-tab-pane>
       <template #suffix>
-        <n-button @click="showModal1 = !showModal1" type="primary" size="small" style="margin-left: 16px">
-          上传
-        </n-button>
-        <n-button type="primary" size="small" style="margin-left: 16px" @click="dlfile">
-          下载
-        </n-button>
-        <n-button type="primary" size="small" style="margin-left: 16px">
-          上传
-        </n-button>
-        <n-button type="primary" size="small" style="margin-left: 16px">
-          上传
-        </n-button>
+       
       </template>
     </n-tabs>
   </n-card>
