@@ -11,18 +11,111 @@ import type { UploadFileInfo, UploadInst } from 'naive-ui'
 import { Buffer } from "buffer";
 import * as fs from 'fs-extra'
 import { ipcRenderer } from 'electron';
+import { onMounted, onUnmounted } from 'vue'
+// 下载状态
+const downloadState = ref({
+  visible: false,
+  fileName: '',
+  url: '',
+  version: '',
+  percentage: 0,
+  downloadedSize: '0 KB',
+  totalSize: '0 MB',
+  speed: '0 KB/s'
+});
 
-// async function downloadFile(outputPath: string) {
-//   const userid = userinfo.value.accout;
-//   const path = '2.jpg';
+// 下载对话框引用
+const downloadModalRef = ref(null);
 
-//   try {
-//     await ipcRenderer.invoke('download-file', { userid, path, outputPath });
-//     console.log('文件下载成功');
-//   } catch (error) {
-//     console.error('文件下载失败', error);
-//   }
-// }
+// 清理函数引用
+let cleanupProgressListener:any = null;
+
+// 组件挂载时设置进度监听器
+onMounted(() => {
+  if (window.electron && window.electron.onDownloadProgress) {
+    cleanupProgressListener = window.electron.onDownloadProgress((progressData:any) => {
+      // 更新下载状态
+      downloadState.value.percentage = progressData.percent;
+      downloadState.value.downloadedSize = progressData.formattedDownloaded;
+      downloadState.value.totalSize = progressData.formattedTotal;
+      downloadState.value.speed = progressData.speed;
+      
+      console.log(`下载进度: ${progressData.percent}%, 速度: ${progressData.speed}`);
+    });
+  }
+});
+
+// 组件卸载时清理监听器
+onUnmounted(() => {
+  if (cleanupProgressListener) {
+    cleanupProgressListener();
+  }
+});
+// 初始化 updateConfirm 为一个响应式对象
+const updateConfirm = ref({
+  visible: false,
+  url: 'http://127.0.0.1:3000/download/downloadFile',
+  filename:'555.jpg',
+  version: '1.1',
+});
+
+// 确认更新开始下载
+const confirmUpdate = async () => {
+  // 隐藏确认对话框
+  updateConfirm.value.visible = false;
+  
+  // 重置下载状态
+  downloadState.value = {
+    visible: true,
+    fileName:'777.jpg',
+    url: updateConfirm.value.url,
+    version: updateConfirm.value.version,
+    percentage: 0,
+    downloadedSize: '0 KB',
+    totalSize: '计算中...',
+    speed: '0 KB/s'
+  };
+  
+  // 显示下载对话框
+  if (downloadModalRef.value) {
+    downloadModalRef.value.startDownload();
+  }
+  
+  try {
+    if (!window.electron || !window.electron.downloadUpdate) {
+      window.electron.ipcRenderer.send('message', 'Hello from Renderer');
+      console.error('下载功能不可用2',window);
+      throw new Error('下载功能不可用');
+    }
+    
+    // 开始下载
+    const result = await window.electron.downloadUpdate({
+      url: updateConfirm.value.url,
+      filename: downloadState.value.fileName,
+      version: updateConfirm.value.version
+    });
+    
+    console.log('下载结果:', result);
+    
+    if (result.success) {
+      // 下载成功，完成下载动画
+      if (downloadModalRef.value) {
+        downloadModalRef.value.completeDownload();
+      }
+    } else {
+      // 下载失败
+      message.error('下载失败: ' + (result.error || '未知错误'), 'error');
+      downloadState.value.visible = false;
+    }
+  } catch (error) {
+    console.error('下载过程出错:', error);
+    message.error('下载过程出错: ' + error.message, 'error');
+    downloadState.value.visible = false;
+  }
+};
+
+
+
 interface RowData {
   key: number
   name: string
@@ -101,10 +194,7 @@ getuserinfo().then(async res => {
   })
 
 })
-import { onMounted } from 'vue'
-onMounted(() => {
 
-})
 var showModal1 = ref(false), f1 = ref(null), f2 = ref(null);
 var filelist1: Ref<UploadFileInfo[]> = ref([]), filelist2: Ref<UploadFileInfo[]> = ref([]);
 //获取第一个
@@ -530,7 +620,7 @@ window.URL.revokeObjectURL(url);
         <n-button type="primary" @click="showModal1 = true">
           上传
         </n-button>
-        <n-button type="primary" @click="downloadfile" >
+        <n-button type="primary" @click="confirmUpdate" >
           下载
         </n-button>
         <n-button type="info" @click="showModal2 = true">
