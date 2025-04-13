@@ -2,6 +2,8 @@
 import { useMessage } from 'naive-ui'
 import { defineComponent, ref, onMounted  } from 'vue'
 import * as echarts from 'echarts'
+import { useprogressData2Store } from '../store/progressData2'
+const pd2=useprogressData2Store()
 
 const chartRef = ref<HTMLDivElement | null>(null)
 
@@ -134,8 +136,8 @@ const options = [
                                         fill="currentColor"></path>
                                 </g>
                             </svg></div>
-                        <div style="font-size:36px;font-family:'微软雅黑';">0</div>
-                        <div style="font-size:16px;">消息总数</div>
+                        <div style="font-size:36px;font-family:'微软雅黑';">{{pd2.uploadedarray.length}}</div>
+                        <div style="font-size:16px;">已上传的文件</div>
                     </div>
                     <div class="cards fatcards blue">
                         <div class="close2"><svg xmlns="http://www.w3.org/2000/svg"

@@ -2,9 +2,67 @@
 import { ref } from "vue";
 import Download1 from "./donwload1.vue";
 import Download2 from "./donwload2.vue";
-import type { Ref } from 'vue';
+import {defineProps,defineEmits} from 'vue'
+import type {Ref,PropType} from 'vue'
 import type { UploadFileInfo, UploadInst } from 'naive-ui'
-import { Buffer } from "buffer";
+import { onMounted, onUnmounted } from 'vue'
+import { useprogressData2Store } from '../store/progressData2';
+let cleanupProgressListener: any = null;
+import deepcopy from 'deepcopy';
+const pd2=   useprogressData2Store()
+// 组件挂载时设置进度监听器
+onMounted(() => {
+  if (window.electron && window.electron.onDownloadProgress) {
+    cleanupProgressListener = window.electron.onDownloadProgress((progressData: any) => {
+      // 更新下载状态
+
+      //后续用序号代替
+      if (progressData.now >= progressData.options.size2) {
+        //进位
+        pd2.settab2value('u1')
+        console.log(pd2.downloadfinisharray, 8888888888888, progressData.options.id)
+        let tmp6 = pd2.downloadfinisharray.filter(item => item !== progressData.options.id)
+        console.log(tmp6, '-------------------------------------')
+        pd2.setdownloadfinisharray(tmp6)
+
+
+
+        let tmp4 = deepcopy(pd2.downloadedarray)
+        let tmp5 = pd2.downloadarray.filter(item => item.id === progressData.options.id)
+        for (let i = 0; i < tmp5.length; i++) {
+          tmp4.push(tmp5[i])
+        }
+
+        pd2.setdownloadedarray(tmp4)
+        pd2.setdownloadarray(pd2.downloadarray.filter(item => item.id != progressData.options.id))
+      }
+      else {
+
+      }
+      console.log(progressData, '\\\\\\\\\\\\\\\\\\\\\\\\')
+      let tmp9=deepcopy(pd2.downloadarray)
+      tmp9.forEach(item=>{
+        if(item.id==progressData.options.id){
+          item.now=progressData.now
+        }
+      })
+pd2.setdownloadarray(tmp9)
+      pd2.setpd(progressData)
+
+
+
+    });
+  }
+
+});
+
+// 组件卸载时清理监听器
+onUnmounted(() => {
+  if (cleanupProgressListener) {
+    cleanupProgressListener();
+
+  }
+})
 var showModal1 = ref(false), f1 = ref(null), f2 = ref(null);
 var filelist1: Ref<UploadFileInfo[]> = ref([]), filelist2: Ref<UploadFileInfo[]> = ref([]);
 //获取第一个
@@ -49,7 +107,7 @@ if(timestart>=total){
   console.log('发送完毕')
   return
 }
-console.log('一次',chunkarray[timestart],timestart,total)
+
 const base64data=await binaryToBase64(chunkarray[timestart])
 
  fetch('/api/upload/ulfile', {
@@ -98,14 +156,10 @@ const sendfile = async () => {
   // f1.value?.submit();
   // f2.value?.submit();
 };
-const dlfile = async () => {
-  await fetch("/api/upload/dlfile?filename=123.txt", {
-    method: "GET",
-    headers: {}
-  }).then(res => {
-    console.log(res, '====')
-  })
-};
+
+
+
+
 </script>
 <template>
   <!-- 弹窗 -->

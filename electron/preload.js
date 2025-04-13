@@ -13,7 +13,7 @@
       // 移除可能存在的旧监听器
       ipcRenderer.removeAllListeners('download-progress');
       
-      // 添加新的监听器
+      // 添加新的监听器，electron -> renderer
       ipcRenderer.on('download-progress', (event, progressData) => {
         callback(progressData);
       });
@@ -22,7 +22,32 @@
       return () => {
         ipcRenderer.removeAllListeners('download-progress');
       };
-    }
+    },
+
+ // 上载文件API
+ uploadUpdate: (options) => {
+  return ipcRenderer.invoke('upload-update', options);
+},
+
+// 下载进度事件监听器
+onUploadProgress: (callback) => {
+  // 移除可能存在的旧监听器
+  ipcRenderer.removeAllListeners('upload-progress');
+  
+  // 添加新的监听器，electron -> renderer
+  ipcRenderer.on('upload-progress', (event, progressData) => {
+    callback(progressData);
+  });
+  
+  // 返回清理函数
+  return () => {
+    ipcRenderer.removeAllListeners('upload-progress');
+  };
+}
+    
+
+
+
   });
   
 window.addEventListener('DOMContentLoaded', () => {

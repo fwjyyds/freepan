@@ -2,7 +2,7 @@
 
 import type { TreeOption } from 'naive-ui'
 import { repeat, sleep } from 'seemly'
-import { defineComponent, ref, type Ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { NIcon, NSpace } from 'naive-ui'
 import { h } from 'vue'
 import { c, useMessage } from 'naive-ui'
@@ -11,106 +11,220 @@ import type { UploadFileInfo, UploadInst } from 'naive-ui'
 import { Buffer } from "buffer";
 import * as fs from 'fs-extra'
 import { ipcRenderer } from 'electron';
+
+import { provide, inject } from 'vue'
+import { defineProps, defineEmits } from 'vue'
+import type { Ref, PropType } from 'vue'
+import { useprogressData2Store } from '../store/progressData2'
 import { onMounted, onUnmounted } from 'vue'
+
+
+
+setInterval (()=>{
+  console.log(pd2.downloadarray,pd2.downloadedarray,pd2.uploadarray,pd2.uploadedarray,pd2.progressData,pd2.progressData2)
+},3000)
+
 // 下载状态
 const downloadState = ref({
-  visible: false,
+
   fileName: '',
   url: '',
   version: '',
   percentage: 0,
   downloadedSize: '0 KB',
   totalSize: '0 MB',
-  speed: '0 KB/s'
+  speed: '0 KB/s',
+  size: 0,
+  size2: 0,
+  attr: '',
+  userid: '-9999',
+  path: ''
 });
 
 // 下载对话框引用
 const downloadModalRef = ref(null);
 
 // 清理函数引用
-let cleanupProgressListener:any = null;
+let cleanupProgressListener: any = null;
+let downloaddata: any = ref([])
 
+
+const pd2=   useprogressData2Store()
 // 组件挂载时设置进度监听器
 onMounted(() => {
   if (window.electron && window.electron.onDownloadProgress) {
-    cleanupProgressListener = window.electron.onDownloadProgress((progressData:any) => {
+    cleanupProgressListener = window.electron.onDownloadProgress((progressData: any) => {
       // 更新下载状态
-      downloadState.value.percentage = progressData.percent;
-      downloadState.value.downloadedSize = progressData.formattedDownloaded;
-      downloadState.value.totalSize = progressData.formattedTotal;
-      downloadState.value.speed = progressData.speed;
-      
-      console.log(`下载进度: ${progressData.percent}%, 速度: ${progressData.speed}`);
+
+      //后续用序号代替
+      if (progressData.now >= progressData.options.size2) {
+        //进位
+        pd2.settab2value('u1')
+        console.log(pd2.downloadfinisharray, 8888888888888, progressData.options.id)
+        let tmp6 = pd2.downloadfinisharray.filter(item => item !== progressData.options.id)
+        console.log(tmp6, '-------------------------------------')
+        pd2.setdownloadfinisharray(tmp6)
+
+
+
+        let tmp4 = deepcopy(pd2.downloadedarray)
+        let tmp5 = pd2.downloadarray.filter(item => item.id === progressData.options.id)
+        for (let i = 0; i < tmp5.length; i++) {
+          tmp4.push(tmp5[i])
+        }
+
+        pd2.setdownloadedarray(tmp4)
+        pd2.setdownloadarray(pd2.downloadarray.filter(item => item.id != progressData.options.id))
+      }
+      else {
+
+      }
+      console.log(progressData, '\\\\\\\\\\\\\\\\\\\\\\\\')
+      let tmp9=deepcopy(pd2.downloadarray)
+      tmp9.forEach(item=>{
+        if(item.id==progressData.options.id){
+          item.now=progressData.now
+        }
+      })
+pd2.setdownloadarray(tmp9)
+      pd2.setpd(progressData)
+
+
+
     });
   }
+
 });
 
 // 组件卸载时清理监听器
 onUnmounted(() => {
   if (cleanupProgressListener) {
     cleanupProgressListener();
-  }
-});
-// 初始化 updateConfirm 为一个响应式对象
-const updateConfirm = ref({
-  visible: false,
-  url: 'http://127.0.0.1:3000/download/downloadFile',
-  filename:'555.jpg',
-  version: '1.1',
-});
 
-// 确认更新开始下载
-const confirmUpdate = async () => {
-  // 隐藏确认对话框
-  updateConfirm.value.visible = false;
-  
-  // 重置下载状态
-  downloadState.value = {
-    visible: true,
-    fileName:'777.jpg',
-    url: updateConfirm.value.url,
-    version: updateConfirm.value.version,
-    percentage: 0,
-    downloadedSize: '0 KB',
-    totalSize: '计算中...',
-    speed: '0 KB/s'
-  };
-  
-  // 显示下载对话框
-  if (downloadModalRef.value) {
-    downloadModalRef.value.startDownload();
   }
-  
+})
+
+
+//下载函数
+const confirmUpdate = async () => {
+  // 重置下载状态
+
   try {
-    if (!window.electron || !window.electron.downloadUpdate) {
-      window.electron.ipcRenderer.send('message', 'Hello from Renderer');
-      console.error('下载功能不可用2',window);
-      throw new Error('下载功能不可用');
+    let tmparray = []
+    for (let i = 0; i < pd2.downloadarray.length; i++) {
+      tmparray.push(pd2.downloadarray[i])
+
     }
-    
-    // 开始下载
-    const result = await window.electron.downloadUpdate({
-      url: updateConfirm.value.url,
-      filename: downloadState.value.fileName,
-      version: updateConfirm.value.version
-    });
-    
-    console.log('下载结果:', result);
-    
-    if (result.success) {
-      // 下载成功，完成下载动画
-      if (downloadModalRef.value) {
-        downloadModalRef.value.completeDownload();
+    let tmpid = 1;
+    for (let i = 0; i < checkedarray.value.length; i++) {
+      let tmp = checkedarray.value[i]
+      tmp.now=0
+      
+      while (true) {
+        if (tmparray.some(item => item?.id == tmpid)) {
+          tmpid++
+        }
+        else {
+          tmp.id = tmpid
+          break
+        }
+
       }
-    } else {
-      // 下载失败
-      message.error('下载失败: ' + (result.error || '未知错误'), 'error');
-      downloadState.value.visible = false;
+
+      tmparray.push(tmp)
+      let tmp8=pd2.downloadfinisharray
+      tmp8.push(tmpid)
+
+      pd2.setdownloadfinisharray(tmp8)
     }
+ 
+    pd2.setdownloadarray(tmparray)
+
+
+
+    for (let i = 0; i < checkedarray.value.length; i++) {
+
+      downloadState.value = {
+        url: 'http://127.0.0.1:3000/download/downloadFile',
+        fileName: checkedarray.value[i].title,
+        version: '1.0',
+        percentage: 0,
+        downloadedSize: '0 KB',
+        totalSize: '计算中...',
+        speed: '68 KB/s',
+        size: checkedarray.value[i].size,
+        size2: checkedarray.value[i].size2,
+        attr: checkedarray.value[i].attr,
+        userid: userinfo.value.accout,
+        path: getpath() + '/' + checkedarray.value[i].title
+      };
+      if (!window.electron || !window.electron.downloadUpdate) {
+        for (let i = 0; i < checkedarray.value.length; i++) {
+          const response = await fetch('/api/download/downloadFile', {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ "userid": userinfo.value.accout, "path": getpath() + '/' + checkedarray.value[i].title, "filename": checkedarray.value[i].title })
+          })
+          const result = await response.blob()
+          // 创建一个URL对象
+          const url = window.URL.createObjectURL(result);
+
+          // 创建一个<a>标签来触发下载
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = checkedarray.value[i].title // 设置默认的文件名
+
+          // 将<a>标签添加到DOM中并触发点击事件
+          document.body.appendChild(a);
+          a.click();
+
+          // 清理
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+          // throw new Error('当前并非 Electron 环境，或者下载功能不可用。');
+
+
+        }
+
+      }
+      else {
+        // 开始下载
+        const result = await window.electron.downloadUpdate({
+          url: 'http://127.0.0.1:3000/download/downloadFile',
+          filename: checkedarray.value[i].title,
+          version: '1.0',
+          percentage: 0,
+          downloadedSize: '0 KB',
+          totalSize: '计算中...',
+          speed: '68.3 KB/s',
+          size: checkedarray.value[i].size,
+          size2: checkedarray.value[i].size2,
+          id:checkedarray.value[i].id,
+          attr: checkedarray.value[i].attr,
+          userid: userinfo.value.accout,
+          path: getpath() + '/' + checkedarray.value[i].title
+        });
+        console.log('下载结果:', result);
+        if (result.success) {
+          message.success('下载成功: ' + '保存在' + result.filePath);
+        } else {
+          // 下载失败
+          message.error('下载失败: ' + 'error');
+
+        }
+      }
+
+
+
+
+    }
+
   } catch (error) {
     console.error('下载过程出错:', error);
     message.error('下载过程出错: ' + error.message, 'error');
-    downloadState.value.visible = false;
+
   }
 };
 
@@ -128,6 +242,9 @@ const getuserinfo = async () => {
   let key: any = localStorage.getItem('userinfo') || "[]"
   let datetmp = new Date().getTime() - parseInt(key.split('|')[0])
   if (datetmp > 1000 * 3600 * 24) {
+    if(localStorage.getItem('userinfo')){
+      localStorage.removeItem(localStorage.getItem('userinfo'))
+    }
     localStorage.removeItem('userinfo')
     localStorage.removeItem(key)
   }
@@ -178,7 +295,7 @@ let userinfo: Ref<any> = ref({}), filedata: any, tmp
 
 getuserinfo().then(async res => {
   userinfo.value = res
-
+  pd2.setuserinfo(res)
   await fetch('/api/upload/filetree', {
     method: "POST",
     headers: {
@@ -205,13 +322,54 @@ const handleChange1 = (options: { fileList: UploadFileInfo[] }) => {
 const handleChange2 = (options: { fileList: UploadFileInfo[] }) => {
   filelist2.value = options.fileList
 }
+// 辅助函数：格式化字节大小
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
 
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+let loading: Array<Object> = []
 const sendsinglefile = async (bigfile: Object, size: number) => {
+
   let start = 0;
   let file = bigfile.file
   let end = Math.min(size, file.size)
   let index = 0;
   let chunkarray = []
+  let pd2 = useprogressData2Store()
+  let tmp1:any
+
+
+  let tmpid = 1
+  let tmp3:any =deepcopy(pd2.uploadarray)
+
+ 
+  while (true) {
+    if (pd2.uploadarray.some(item => item?.id == tmpid)) {
+      tmpid++
+    }
+    else {
+      break
+    }
+
+  }
+  tmp3.push(  {
+    attr: file.name.split('.').pop(),
+    size: formatBytes(file.size),
+    size2: file.size,
+    title: file.name,
+    id: tmpid,
+    now:0
+  })
+
+  pd2.setuploadarray(tmp3)
+
   let total = Math.ceil(file.size / size);
   async function binaryToBase64(data: Blob) {
     return new Promise((resolve, reject) => {
@@ -239,7 +397,7 @@ const sendsinglefile = async (bigfile: Object, size: number) => {
       console.log('发送完毕')
       return
     }
-    console.log('一次', chunkarray[timestart], timestart, total)
+
     const base64data = await binaryToBase64(chunkarray[timestart])
 
     fetch('/api/upload/ulfile', {
@@ -253,9 +411,60 @@ const sendsinglefile = async (bigfile: Object, size: number) => {
       })
     }).then(res => res.json()).then(async res => {
 
-      if (res.status == 200) {
-        message.success(res.message)
+      let pd2 = useprogressData2Store()
+      if(!pd2.uploadfinisharray.includes(tmpid)){
+pd2.uploadfinisharray.push(tmpid)
+      }
  
+      pd2.setpd2({
+        options: {
+          filename: res.filename,
+          size2: res.total,
+          id:tmpid
+        },
+        now: res.now,
+        speed: formatBytes(chunkSize * 2),
+        finisharray:pd2.uploadfinisharray
+      })
+
+      let tmp7= deepcopy(pd2.uploadarray)
+ 
+     tmp7.forEach(item => {
+      if(item.id ===  tmpid){
+        item.now=res.now
+        item.total=res.total
+      }
+     })
+ 
+     pd2.setuploadarray(tmp7)
+
+
+
+      if (res.status == 200) {
+        pd2.settab1value('u1')
+        pd2.setuploadfinisharray(pd2.uploadfinisharray.filter(item => item != tmpid))
+       tmp1 = deepcopy(pd2.uploadedarray)
+        tmp1.push({
+          attr: file.name.split('.').pop(),
+          size: formatBytes(file.size),
+          size2: file.size,
+          title: file.name,
+          id:tmpid
+        })
+        let tmp2 = pd2.uploadarray.filter(item => item.id != tmpid)  
+
+        pd2.setuploadarray(tmp2)
+        pd2.setuploadedarray(tmp1)
+
+
+
+
+        console.log('发送成功', {
+          speed: formatBytes(chunkSize * 2),
+          loading: loading
+        })
+        message.success(res.message)
+
         await fetch('/api/upload/filetree', {
           method: "POST",
           headers: {
@@ -289,8 +498,54 @@ const sendsinglefile = async (bigfile: Object, size: number) => {
       },
       body: JSON.stringify({ total: total, index: timestart, chunk: base64data2, filename: file.name, userid: userinfo.value.accout, path: getpath() })
     }).then(res => res.json()).then(async res => {
+      let pd2 = useprogressData2Store()
+      if(!pd2.uploadfinisharray.includes(tmpid)){
+pd2.uploadfinisharray.push(tmpid)
+      }
+    
 
+
+      pd2.setpd2({
+        options: {
+          filename: res.filename,
+          size2: res.total,
+          id:tmpid
+        },
+        now: res.now,
+        speed: formatBytes(chunkSize * 2),
+        finisharray:pd2.uploadfinisharray
+      })
+     let tmp7= deepcopy(pd2.uploadarray)
+     tmp7.forEach(item => {
+      if(item.id ===  tmpid){
+        item.now=res.now
+        item.total=res.total
+      }
+     })
+
+     pd2.setuploadarray(tmp7)
       if (res.status == 200) {
+        pd2.settab1value('u1')
+        pd2.setuploadfinisharray(pd2.uploadfinisharray.filter(item => item != tmpid))
+        tmp1 = deepcopy(pd2.uploadedarray)
+        tmp1.push({
+          attr: file.name.split('.').pop(),
+          size: formatBytes(file.size),
+          size2: file.size,
+          title: file.name,
+          id:tmpid
+        })
+        let tmp2 = pd2.uploadarray.filter(item => item.id != tmpid)
+
+        pd2.setuploadarray(tmp2)
+        pd2.setuploadedarray(tmp1)
+
+
+
+        console.log('发送成功', {
+          speed: formatBytes(chunkSize * 2),
+          loading: loading
+        })
         message.success(res.message)
         await fetch('/api/upload/filetree', {
           method: "POST",
@@ -316,10 +571,11 @@ const sendsinglefile = async (bigfile: Object, size: number) => {
 
 
 }
+var chunkSize = 2 * 1024 * 1024; // 每个切片的大小，这里设置为2Mb,每秒发送二个，速率就是4Mb/s
 const message = useMessage();
 const sendfile = async () => {
   console.log(userinfo.value.accout, '=')
-  const chunkSize = 2 * 1024 * 1024; // 每个切片的大小，这里设置为1000kb,每秒发送二个，速率就是200kb/s
+ 
   if (filelist1.value.length == 0 && filelist2.value.length == 0) {
 
     console.log('请选择文件')
@@ -335,14 +591,7 @@ const sendfile = async () => {
   // f1.value?.submit();
   // f2.value?.submit();
 };
-const dlfile = async () => {
-  await fetch("/api/upload/dlfile?filename=123.txt", {
-    method: "GET",
-    headers: {}
-  }).then(res => {
-    console.log(res, '====')
-  })
-};
+
 
 
 
@@ -371,7 +620,7 @@ const columns = [
   }
 ]
 const pagination = {
-  pageSize: 10
+  pageSize: 3
 }
 const rowKey = (row: RowData) => row.title
 const shang = () => {
@@ -421,20 +670,27 @@ function removeLastSegment(path: string) {
   // 如果原字符串是以 '/' 开头的，我们需要在返回的结果前加上 '/'
   return parts.length > 0 && path.startsWith('/') ? '/' + parts.join('/') : parts.join('/');
 }
-let ssk=0
+let ssk: any[] = []
 const rowProps = (row: any) => {
   return {
     style: 'cursor: pointer;',
     onClick: async () => {
-      //  console.log(';0000000000000000',row.c)
+
       if (row.childrens) {
 
-   
-        currentpath.value += ' / ' + row.title
-        goToChild(data2.value)
-        data2.value = row.childrens
- 
-      
+
+        if (checkedarray.value != ssk) {
+          ssk = checkedarray.value
+          return
+        }
+        else {
+          currentpath.value += ' / ' + row.title
+          goToChild(data2.value)
+          data2.value = row.childrens
+        }
+
+
+
 
       }
       else {
@@ -444,38 +700,42 @@ const rowProps = (row: any) => {
   }
 }
 import type { DataTableColumns, DataTableRowKey } from 'naive-ui'
-let checkedarray:any=ref([])
-async function handleCheck(rowKeys: DataTableRowKey[]) {
+import { format } from 'path'
+import { use } from 'echarts/types/src/extension.js'
+let checkedarray: any = ref([])
+async function handleCheck(rowKeys: DataTableRowKey[], meta: any) {
 
-  checkedarray.value = rowKeys
-  
+  checkedarray.value = meta
+
 
 }
-const deletefile= async () => {
+const deletefile = async () => {
 
-for(let i=0;i<checkedarray.value.length;i++){
-  fetch('/api/upload/deletefile', {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ "userid": userinfo.value.accout, "path": getpath() + '/' + checkedarray.value[i] })
-  }).then(res => res.json()).then(async res => {
-    if (res.status == 200) {
-      message.success('删除成功')
-      await fetch('/api/upload/filetree', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ "userid": userinfo.value.accout, "path": getpath() })
-      }).then(res => res.json()).then(res => {
-        tmp = res.data
-        filedata = tmp
-        data2.value = tmp
+  for (let i = 0; i < checkedarray.value.length; i++) {
+    fetch('/api/upload/deletefile', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ "userid": userinfo.value.accout, "path": getpath() + '/' + checkedarray.value[i].title })
+    }).then(res => res.json()).then(async res => {
+      if (res.status == 200) {
+        message.success('删除成功')
+        await fetch('/api/upload/filetree', {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ "userid": userinfo.value.accout, "path": getpath() })
+        }).then(res => res.json()).then(res => {
+          tmp = res.data
+          filedata = tmp
+          data2.value = tmp
 
-      })
-}}) }
+        })
+      }
+    })
+  }
   console.log('删除文件')
 }
 let currentpath = ref('我的文件')
@@ -529,30 +789,30 @@ const createfolder = async () => {
 let showModal2 = ref(false), foldername = ref('')
 
 const downloadfile = async () => {
-  console.log('下载文件',checkedarray.value)
-const response = await fetch('/api/download/downloadFile', {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ "userid": userinfo.value.accout, "path": '2.jpg' })
-})
-const result = await response.blob()
-// 创建一个URL对象
-const url = window.URL.createObjectURL(result);
+  console.log('下载文件', checkedarray.value)
+  const response = await fetch('/api/download/downloadFile', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ "userid": userinfo.value.accout, "path": '2.jpg' })
+  })
+  const result = await response.blob()
+  // 创建一个URL对象
+  const url = window.URL.createObjectURL(result);
 
-// 创建一个<a>标签来触发下载
-const a = document.createElement('a');
-a.href = url;
-a.download = '2.jpg'; // 设置默认的文件名
+  // 创建一个<a>标签来触发下载
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '2.jpg'; // 设置默认的文件名
 
-// 将<a>标签添加到DOM中并触发点击事件
-document.body.appendChild(a);
-a.click();
+  // 将<a>标签添加到DOM中并触发点击事件
+  document.body.appendChild(a);
+  a.click();
 
-// 清理
-document.body.removeChild(a);
-window.URL.revokeObjectURL(url);
+  // 清理
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 }
 </script>
 <template>
@@ -620,7 +880,7 @@ window.URL.revokeObjectURL(url);
         <n-button type="primary" @click="showModal1 = true">
           上传
         </n-button>
-        <n-button type="primary" @click="confirmUpdate" >
+        <n-button type="primary" @click="confirmUpdate">
           下载
         </n-button>
         <n-button type="info" @click="showModal2 = true">
@@ -634,8 +894,8 @@ window.URL.revokeObjectURL(url);
 
     <n-divider />
     <div>
-      <n-data-table :columns="columns" :data="data2" :pagination="pagination"
-        :row-key="rowKey" :row-props="rowProps"   @update:checked-row-keys="handleCheck"/>
+      <n-data-table :columns="columns" :data="data2" :pagination="pagination" :row-key="rowKey" :row-props="rowProps"
+        @update:checked-row-keys="handleCheck" />
     </div>
   </div>
 </template>

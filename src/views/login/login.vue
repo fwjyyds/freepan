@@ -117,7 +117,7 @@ const login = () => {
             console.log(decryptword, '解密后')
         })
         //路由跳转
-            router.push('/main')
+            router.push('/main/me')
         } else {
             notification['error']({
                 content: '错误' + res.data.status,

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import login from '../views/login/login.vue'
 import main from '../views/font/main.vue'
 import download from '../views/font/download.vue'
+import {useMessage} from 'naive-ui'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -77,6 +78,18 @@ const router = createRouter({
   ]
 })
 
-
-
+const message = useMessage()
+router.beforeEach((to, from, next) => {
+  if (to.name === 'login') {
+    next()
+  } else {
+    const token = localStorage.getItem('userinfo')
+    if (token) {
+      next()
+    } else {
+   console.log('token不存在')
+      next('/login')
+    }
+  }
+})
 export default router
